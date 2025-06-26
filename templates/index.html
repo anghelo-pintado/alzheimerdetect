@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Nuevo Análisis Clínico</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Iniciar Nuevo Análisis Clínico</h1>
+      <p class="subtitle">
+        Complete la información del paciente e ingrese los valores de los
+        biomarcadores.
+      </p>
+
+      <form id="predictForm">
+        <!-- Sección 1: Info Paciente -->
+        <fieldset>
+          <legend>1. Información del Paciente</legend>
+          <div class="grid-2">
+            <div class="input-group">
+              <label for="idPaciente">ID del Paciente</label>
+              <div class="with-addon">
+                <input
+                  type="text"
+                  id="idPaciente"
+                  name="idPaciente"
+                  placeholder="Ej: P005"
+                  required
+                />
+                <span class="addon">ID</span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="name">Nombre Completo</label>
+              <div class="with-addon">
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Ej: Laura Vargas"
+                  required
+                />
+                <span class="addon">Nombre</span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Sección 2: Biomarcadores -->
+        <fieldset>
+          <legend>2. Valores de Biomarcadores</legend>
+          <div class="grid-3">
+            <div class="input-group">
+              <label for="Age">Edad</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="Age"
+                  name="Age"
+                  placeholder="Años"
+                  step="1"
+                  required
+                />
+                <span class="addon">Entero</span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="MMSE">Puntaje MMSE</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="MMSE"
+                  name="MMSE"
+                  placeholder="Puntaje"
+                  step="0.1"
+                  required
+                />
+                <span class="addon">0–30</span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="EDUC">Años de Educación</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="EDUC"
+                  name="EDUC"
+                  placeholder="Años"
+                  step="0.1"
+                  required
+                />
+                <span class="addon">0-20</span>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="SES">Estado Socioeconómico</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="SES"
+                  name="SES"
+                  placeholder="1–5"
+                  step="1"
+                  required
+                />
+                <span class="addon">1–5</span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="eTIV">Volumen Intracraneal (eTIV)</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="eTIV"
+                  name="eTIV"
+                  placeholder="mm³"
+                  step="0.1"
+                  required
+                />
+                <span class="addon">1100–2000</span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="nWBV">Volumen Cerebral (nWBV)</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="nWBV"
+                  name="nWBV"
+                  placeholder="Proporción"
+                  step="0.0001"
+                  required
+                />
+                <span class="addon">0.6–0.9</span>
+              </div>
+            </div>
+
+            <div class="input-group wide">
+              <label for="ASF">Factor de Escala (ASF)</label>
+              <div class="with-addon">
+                <input
+                  type="number"
+                  id="ASF"
+                  name="ASF"
+                  placeholder="Factor"
+                  step="0.0001"
+                  required
+                />
+                <span class="addon">>0.8</span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn-primary">
+          Analizar y Generar Reporte
+        </button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("predictForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const form = e.target;
+          const data = {
+            name: form.name.value,
+            Age: form.Age.value,
+            MMSE: form.MMSE.value,
+            EDUC: form.EDUC.value,
+            SES: form.SES.value,
+            eTIV: form.eTIV.value,
+            nWBV: form.nWBV.value,
+            ASF: form.ASF.value,
+          };
+
+          // Llamada a /predict
+          let resp = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const result = await resp.json();
+          if (!resp.ok) {
+            alert(result.error || "Error en la predicción");
+            return;
+          }
+
+          // Llamada a /generate_pdf
+          const pdfResp = await fetch("/generate_pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, ...result }),
+          });
+          const blob = await pdfResp.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${form.name.value}_reporte.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        });
+    </script>
+  </body>
+</html>
