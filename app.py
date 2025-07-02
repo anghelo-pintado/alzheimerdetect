@@ -2,6 +2,7 @@ import os
 import io
 import pickle
 
+import datetime 
 import numpy as np
 import tensorflow as tf
 from flask import Flask, request, jsonify, render_template, make_response
@@ -72,7 +73,7 @@ def create_app():
         paciente = data.get('name', 'Paciente Desconocido')
         paciente_id = data.get('idPaciente', '')
         edad = data.get('Age', '')
-        fecha = data.get('date', '')
+        fecha = datetime.date.today().strftime("%d/%m/%Y")
         label = data.get('label', '')
         confidence = data.get('confidence', '')
 
@@ -110,12 +111,10 @@ def create_app():
             c.setFont("Helvetica-Bold", 10)
             c.drawString(20*mm, height - 60*mm, "Paciente:")
             c.drawString(100*mm, height - 60*mm, paciente)
-            c.drawString(20*mm, height - 68*mm, "ID Paciente:")
-            c.drawString(100*mm, height - 68*mm, paciente_id)
-            c.drawString(20*mm, height - 76*mm, "Edad:")
-            c.drawString(100*mm, height - 76*mm, str(edad))
-            c.drawString(20*mm, height - 84*mm, "Fecha de Informe:")
-            c.drawString(100*mm, height - 84*mm, fecha)
+            c.drawString(20*mm, height - 68*mm, "Edad:")
+            c.drawString(100*mm, height - 68*mm, str(edad))
+            c.drawString(20*mm, height - 76*mm, "Fecha de Informe:")
+            c.drawString(100*mm, height - 76*mm, fecha)
 
             # Tabla de resultados
             table_data = [
@@ -138,7 +137,7 @@ def create_app():
             # Firma
             c.line(30*mm, 40*mm, 80*mm, 40*mm)
             c.setFont("Helvetica", 8)
-            c.drawString(30*mm, 36*mm, "Dr. Nombre del Especialista")
+            c.drawString(30*mm, 36*mm, "Dr. Junior Infantes Rondo")
             c.drawString(30*mm, 32*mm, "Especialista en Neurología")
 
             # Pie de página
