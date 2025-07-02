@@ -119,3 +119,45 @@ form legend {
 .btn-primary:hover {
   background-color: #374151;
 }
+/* ===== Responsive ===== */
+
+/* 1) Escritorio grande a mediano: de 3 columnas a 2 */
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 2) Tablets y móviles grandes: de 2 columnas a 1 */
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .input-group.wide {
+    grid-column: span 1; /* que el campo “wide” no intente ocupar 3 columnas */
+  }
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* 3) Móviles pequeños: ajustes de tipografía y botón */
+@media (max-width: 480px) {
+  body {
+    padding: 0.75rem;
+  }
+  h1 {
+    font-size: 1.4rem;
+  }
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  .btn-primary {
+    width: 100%;
+    float: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
